@@ -22,13 +22,4 @@ public class NodeContent {
         this.phylesis = phylesis;
     }
 
-    public void ajout(Node n){
-        if(this.id != n.src_id){
-            for(int i =0; i < n.fils.size();i++){
-              this.ajout(n.fils.get(i));
-            }
-        }else{  n.content = this;}
-
-    }
-
 }
