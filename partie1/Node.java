@@ -18,24 +18,32 @@ public class Node {
         this.src_id = src_id;
     }
 
-    public void ajout(Node racine,int id){
-        if(racine.src_id == id ){
-            racine.fils.add(this);
-        }else{ 
-            for(int i =0; i < racine.fils.size();i++){
-                this.ajout(racine.fils.get(i), id);
+    public boolean ajout(Node children,int id){
+        if(this.src_id == id ){
+            this.fils.add(children);
+            return true;
+        } else{
+            for(int i =0; i < this.fils.size();i++){
+                if(this.fils.get(i).ajout(children, id)) {
+                    return true;
+                }
             } 
         }
+        return false;
     } 
 
-    public void ajoutNodeContent(NodeContent content){
+    public boolean ajoutNodeContent(NodeContent content){
         if(this.src_id == content.id ){
             this.content = content;
-        }else{ 
+            return true;
+        } else{
             for(int i =0; i < this.fils.size();i++){
-                this.ajout(this.fils.get(i), content.id);
+                if(this.fils.get(i).ajoutNodeContent(content)) {
+                    return true;
+                }
             } 
         }
+        return false;
     }
 
 }

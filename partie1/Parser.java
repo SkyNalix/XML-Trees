@@ -9,30 +9,29 @@ import org.w3c.dom.*;
 public class Parser {
 
     public static void main(String[] args){
-        Node x = parse("treeoflife_links.csv", "treeoflife_nodes.csv");
-        javaToXml(x);
+        Node x = parse();
+        if(x != null)
+            javaToXml(x);
     }
 
-
-    public static Node parse(String file,String file2){
+    public static Node parse(){
         try {
-            Scanner sc = new Scanner(new File(file));
+            Scanner sc = new Scanner(new File("treeoflife_links.csv"));
             
             String str = "";
             sc.nextLine();
             Node racine = new Node(1);
 
-
             while(sc.hasNextLine()){
                 str = sc.nextLine();
-                auxiliaire(str.split(","), racine);
+                String[] splitted = str.split(",");
+                Node x = new Node(Integer.parseInt(splitted[0]),Integer.parseInt(splitted[1]));
+                racine.ajout(x, x.trg_id);
             }
             sc.close();
 
-            // on parse le fichier treeoflife_nodes.csv
-            Scanner sc2 = new Scanner(new File(file2));
+            Scanner sc2 = new Scanner(new File("treeoflife_nodes.csv"));
             sc2.nextLine();
-
             while(sc2.hasNextLine()){
                 str = sc2.nextLine();
                 auxiliaireNode(parseLine(str), racine);
@@ -40,18 +39,21 @@ public class Parser {
 
             sc2.close();  
             return racine;
-        }catch(Exception e){e.printStackTrace(); return null;}
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String[] parseLine(String str){
         String[] tab = {"","","","","","","",""};
-        
+
         int index = 0;
         int compteurG = 0;
 
         for(int i =0;i<str.length();i++){
             if(compteurG %2 ==0 && str.charAt(i) == ',' ){
-                index ++; 
+                index ++;
             } else  {
                 if(str.charAt(i) == '"'){compteurG++;}
                 tab[index] += str.charAt(i);
@@ -61,19 +63,12 @@ public class Parser {
         return tab;
     }
 
-    public static void auxiliaire(String[] tab,Node racine){
-        Node x = new Node(Integer.parseInt(tab[0]),Integer.parseInt(tab[1]));
-        x.ajout(racine, x.trg_id);
-    }
-
-
     public static void auxiliaireNode(String[] tab,Node racine){
         NodeContent x = new NodeContent(Integer.parseInt(tab[0]), tab[1], Integer.parseInt(tab[2]), 
                         Integer.parseInt(tab[3]), Integer.parseInt(tab[4]), Integer.parseInt(tab[5]),
                         Integer.parseInt(tab[5]), Integer.parseInt(tab[6]));
-        x.ajout(racine);           
+        racine.ajoutNodeContent(x);
     }
-
 
     public static void javaToXml(Node nodeRacine){
 
@@ -103,8 +98,6 @@ public class Parser {
 
 
     public static void NodeToElem(Node nodeRacine,Element racine,Document XML_Document){
-
-        
             Element elem = XML_Document.createElement("Node");
 
             Attr atribut1 = XML_Document.createAttribute("node_id");   
