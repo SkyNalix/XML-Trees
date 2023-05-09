@@ -22,3 +22,4 @@ pre-compute:
 clean:
 	echo "Cleaning"
 	rm -f *.svg pre-compute.xml
+
