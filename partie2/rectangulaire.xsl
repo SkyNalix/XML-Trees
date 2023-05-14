@@ -35,7 +35,7 @@
         <xsl:variable name="mid" select="$leftLimit + ($rightLimit - $leftLimit) div 2"/>
         <xsl:variable name="ypos" select="@depth * $spacing_y"/>
 
-        <xsl:if test="$parentX != $mid">
+        <xsl:if test="$parentX != $mid and (not(following-sibling::Node) or not(preceding-sibling::Node))">
           <line x1="{$mid}"
             y1="{$ypos}"
             x2="{$parentX}"
@@ -51,13 +51,13 @@
           stroke="black"
           stroke-width="{$y_line_thick}"/>
 
-        <xsl:if test=".[not(*)] and (($ypos + $spacing_y) &lt; ($height - 5))">
+        <!-- <xsl:if test=".[not(*)] and (($ypos + $spacing_y) &lt; ($height - 5))">
           <line x1="{$mid}"
             y1="{$ypos + $spacing_y}"
             x2="{$mid}"
             y2="{$height - 5}"
             stroke="#999999" stroke-width="{$y_line_thick}" stroke-linecap="round" stroke-dasharray="1, 3"/>
-        </xsl:if>
+        </xsl:if> -->
 
         <xsl:apply-templates select="Node">
           <xsl:with-param name="leftLimit" select="$leftLimit"/>
