@@ -16,13 +16,16 @@
     </xsl:variable>
 
   
-    <xsl:variable name="nbFeuillesFromRoot" select="count(.//Node[not(*)])"/>
-    <xsl:variable name="degrees-per-node" select="360 div $nbFeuillesFromRoot"/>
+    <xsl:variable name="nbFeuilles" select="count(.//Node[not(*)])"/>
+    <xsl:variable name="degrees-per-node" select="360 div $nbFeuilles"/>
     
     <xsl:template match="/ArbreDeVie">
       <ArbreDeVie>
         <xsl:attribute name="max-depth">
           <xsl:value-of select="$max-depth"/>
+        </xsl:attribute>
+        <xsl:attribute name="nbFeuilles">
+          <xsl:value-of select="$nbFeuilles"/>
         </xsl:attribute>
 
         <xsl:apply-templates select="Node">
@@ -41,10 +44,6 @@
       <Node>
         <xsl:attribute name="depth">
           <xsl:value-of select="$depth"/>
-        </xsl:attribute>
-
-        <xsl:attribute name="nbFeuilles">
-          <xsl:value-of select="count(.//Node[not(*)])"/>
         </xsl:attribute>
 
         <xsl:variable name="precedingDirectFeuilles" select="count (preceding-sibling::Node[not(*)])"/>

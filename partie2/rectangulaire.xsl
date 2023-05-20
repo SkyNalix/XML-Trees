@@ -11,7 +11,7 @@
     <xsl:variable name="x_line_thick" select="0.2"/>
     <xsl:variable name="y_line_thick" select="0.2"/>
 
-    <xsl:variable name="width" select="$spacing_x * ArbreDeVie/Node/@nbFeuilles"/>
+    <xsl:variable name="width" select="$spacing_x * ArbreDeVie/@nbFeuilles"/>
     <xsl:variable name="height" select="$spacing_y * ArbreDeVie/@max-depth"/>
     
     <xsl:template match="/">

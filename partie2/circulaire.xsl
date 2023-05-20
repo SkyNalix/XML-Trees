@@ -7,7 +7,7 @@
   
   <xsl:output encoding="UTF-8" indent="yes"/>
 
-  <xsl:variable name="svgSize" select="500000"/>
+  <xsl:variable name="svgSize" select="100000"/>
   <xsl:variable name="mult" select="$svgSize div 2 div /ArbreDeVie/@max-depth"/>
 
   <xsl:function name="fun:normCoord" as="xsd:double">
@@ -53,7 +53,7 @@
     <xsl:sequence>
         <xsl:text>&lt;path d="</xsl:text>
         <xsl:value-of select="$d"/>
-        <xsl:text>" fill="none" stroke="black" stroke-width="4"/&gt;&#10;</xsl:text>
+        <xsl:text>" fill="none" stroke="black" stroke-width="4"/&gt;</xsl:text>
     </xsl:sequence>
   </xsl:function>
 
@@ -184,7 +184,7 @@
             <xsl:value-of select="fun:normCoord($connectX, @depth)"/>
             <xsl:text>" y2="</xsl:text>
             <xsl:value-of select="fun:normCoord($connectY, @depth)"/>
-            <xsl:text>" fill="none" stroke="red" stroke-width="4"/&gt;&#10;</xsl:text>
+            <xsl:text>" stroke="red" stroke-width="4"/&gt;</xsl:text>
 
             <xsl:if test="not(following-sibling::Node) and preceding-sibling::Node">
                 <xsl:variable name="mid" select="fun:getMid(preceding-sibling::Node[last()])"/>
@@ -194,6 +194,21 @@
                 fun:normCoord($siblingConnectX, @depth), fun:normCoord($siblingConnectY, @depth),
                 fun:normCoord($connectX, @depth), fun:normCoord($connectY, @depth))"/>
             </xsl:if>
+            
+<!-- 
+            <xsl:if test=".[not(*)]">
+                    <xsl:text>&lt;line x1="</xsl:text>
+                    <xsl:value-of select="fun:normCoord($connectX, @depth + 1)"/>
+                    <xsl:text>" y1="</xsl:text>
+                    <xsl:value-of select="fun:normCoord($connectY, @depth + 1)"/>
+                    <xsl:text>" x2="</xsl:text>
+                    <xsl:value-of select="fun:normCoord($connectX, /ArbreDeVie/@max-depth)"/>
+                    <xsl:text>" y2="</xsl:text>
+                    <xsl:value-of select="fun:normCoord($connectY, /ArbreDeVie/@max-depth)"/>
+                    <xsl:text>" stroke="#999999" stroke-width="4"/&gt;</xsl:text>
+            </xsl:if> 
+-->
+
         </xsl:variable>
 
         <xsl:variable name="res">
