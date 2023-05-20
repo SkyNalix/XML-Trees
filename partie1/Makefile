@@ -15,8 +15,7 @@ run:
 
 check:
 	echo "Checking validation"
-	xmllint --schema verification.xsd xmlTree.xml > out.txt
-	rm -f out.txt
+	xmllint --noout --schema verification.xsd xmlTree.xml
 
 clean:
 	echo "Cleaning"
