@@ -55,7 +55,7 @@
             <xsl:if test=".[not(*)]">
                 <xsl:variable name="mid-angle" select="($leftLimit + $rightLimit) div 2"/>
                 <xsl:attribute name="angle">
-                    <xsl:value-of select="2 * math:pi() * $mid-angle div 360"/>
+                    <xsl:value-of select="$mid-angle * math:pi() div 180"/>
                 </xsl:attribute>
             </xsl:if>
 

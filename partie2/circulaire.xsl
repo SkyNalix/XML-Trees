@@ -8,29 +8,51 @@
     <xsl:output encoding="UTF-8" indent="yes"/>
 
     <xsl:variable name="svgSize" select="100000"/>
-    <xsl:variable name="mult" select="$svgSize div 2 div /ArbreDeVie/@max-depth"/>
+    <xsl:variable name="spacing" select="$svgSize div 2 div /ArbreDeVie/@max-depth"/>
 
     <xsl:function name="fun:normCoord" as="xsd:double">
         <xsl:param name="n" as="xsd:double"/>
         <xsl:param name="depth" as="xsd:double"/>
-        <xsl:sequence select="$n * ($mult * $depth) + ($svgSize div 2)"/>
+        <xsl:sequence select="$n * ($spacing * $depth) + ($svgSize div 2)"/>
     </xsl:function>
 
-    <xsl:function name="fun:generateArcPath">
-            <xsl:param name="x1"/>
-            <xsl:param name="y1"/>
-            <xsl:param name="x2"/>
-            <xsl:param name="y2"/>
+    <xsl:function name="fun:getMid" as="xsd:double">
+                <xsl:param name="n" as="element()"/>
+        <xsl:choose>
+            <xsl:when test="$n[not(*)]">
+                <xsl:value-of select="$n/@angle"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="angles" as="xsd:double*">
+                    <xsl:for-each select="$n/Node">
+                        <xsl:value-of select="fun:getMid(.)"/>
+                    </xsl:for-each>
+                </xsl:variable>
+                <xsl:variable name="angle" as="xsd:double">
+                    <xsl:variable name="left" select="$angles[1]"/>
+                    <xsl:variable name="right" select="$angles[last()]"/>
+                    <xsl:value-of select="($left + $right) div 2"/>
+                </xsl:variable>
+                <xsl:value-of select="$angle"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <xsl:function name="fun:makePath" as="xsd:string">
+                <xsl:param name="start" as="xsd:double"/>
+                <xsl:param name="end" as="xsd:double"/>
+                <xsl:param name="depth" as="xsd:double"/>
+        <xsl:variable name="x1" select="fun:normCoord(math:cos($start), $depth)"/>
+        <xsl:variable name="y1" select="fun:normCoord(math:sin($start), $depth)"/>
+
         <xsl:variable name="centerX" select="$svgSize div 2"/>
         <xsl:variable name="centerY" select="$svgSize div 2"/>
         <xsl:variable name="radius" select="math:sqrt(($centerX - $x1) * ($centerX - $x1) + ($centerY - $y1) * ($centerY - $y1))"/>
-        <xsl:variable name="startAngle" select="math:atan2($y1 - $centerY, $x1 - $centerX) * 180 div math:pi()"/>
-        <xsl:variable name="endAngle" select="math:atan2($y2 - $centerY, $x2 - $centerX) * 180 div math:pi()"/>
-        <xsl:variable name="largeArc" select="if ($endAngle - $startAngle > 180) then 1 else 0"/>
-        <xsl:variable name="x1Coord" select="$centerX + $radius * math:cos($startAngle * math:pi() div 180)"/>
-        <xsl:variable name="y1Coord" select="$centerY + $radius * math:sin($startAngle * math:pi() div 180)"/>
-        <xsl:variable name="x2Coord" select="$centerX + $radius * math:cos($endAngle * math:pi() div 180)"/>
-        <xsl:variable name="y2Coord" select="$centerY + $radius * math:sin($endAngle * math:pi() div 180)"/>
+        <xsl:variable name="largeArc" select="if (($end * 180 div math:pi()) - ($start * 180 div math:pi()) > 180) then 1 else 0"/>
+        <xsl:variable name="x1Coord" select="fun:normCoord(math:cos($start), $depth)"/>
+        <xsl:variable name="y1Coord" select="fun:normCoord(math:sin($start), $depth)"/>
+        <xsl:variable name="x2Coord" select="fun:normCoord(math:cos($end), $depth)"/>
+        <xsl:variable name="y2Coord" select="fun:normCoord(math:sin($end), $depth)"/>
         <xsl:variable name="d">
             <xsl:text>M</xsl:text>
             <xsl:value-of select="$x1Coord"/>
@@ -42,52 +64,22 @@
             <xsl:value-of select="$radius"/>
             <xsl:text> 0 </xsl:text>
             <xsl:value-of select="$largeArc"/>
-            <xsl:text>, 1, </xsl:text>
+            <xsl:text>, 0, </xsl:text>
             <xsl:value-of select="$x2Coord"/>
             <xsl:text>,</xsl:text>
             <xsl:value-of select="$y2Coord"/>
         </xsl:variable>
-        <xsl:sequence>
-            <xsl:text>&lt;path d="</xsl:text>
-            <xsl:value-of select="$d"/>
-            <xsl:text>" fill="none" stroke="black" stroke-width="4"/&gt;</xsl:text>
-        </xsl:sequence>
+        <xsl:variable name="res">
+            <xsl:sequence>
+                <xsl:text>&lt;path d="</xsl:text>
+                <xsl:value-of select="$d"/>
+                <xsl:text>" fill="none" stroke="black" stroke-width="4"/&gt;</xsl:text>
+            </xsl:sequence>
+        </xsl:variable>
+        <xsl:value-of select="$res"/>
     </xsl:function>
 
 
-    <xsl:function name="fun:getMid" as="xsd:double">
-                <xsl:param name="n" as="element()"/>
-
-        <xsl:choose>
-            <xsl:when test="$n[not(*)]">
-                <xsl:value-of select="$n/@angle"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:variable name="angles" as="xsd:string*">
-                    <xsl:for-each select="$n/Node">
-                        <xsl:value-of select="fun:getMid(.)"/>
-                    </xsl:for-each>
-                </xsl:variable>
-
-                <xsl:variable name="angle" as="xsd:double">
-                    <xsl:choose>
-                        <xsl:when test="count($angles) = 1">
-                            <xsl:value-of select="number($angles[1])"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:variable name="left" select="number($angles[1])"/>
-                            <xsl:variable name="right" select="number($angles[last()])"/>
-                            <xsl:value-of select="($left + $right) div 2"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:variable>
-                <xsl:value-of select="$angle"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-
-
-    <!-- Define the main template -->
     <xsl:template match="/">
         <svg width="{$svgSize}" height="{$svgSize}" >
         <rect x="0" y="0" width="{$svgSize}" height="{$svgSize}" fill="white"/>
@@ -131,55 +123,54 @@
         </xsl:variable>
 
         <xsl:variable name="angle">
-            <xsl:choose>
-                <xsl:when test="count($angles) = 1">
-                    <xsl:value-of select="$angles[1]"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:variable name="left" select="number($angles[1])"/>
-                    <xsl:variable name="right" select="number($angles[last()])"/>
-                    <xsl:value-of select="($left + $right) div 2"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:variable name="left" select="number($angles[1])"/>
+            <xsl:variable name="right" select="number($angles[last()])"/>
+            <xsl:value-of select="($left + $right) div 2"/>
         </xsl:variable>
 
         <xsl:variable name="this-tag">
-            <xsl:variable name="connectX" select="math:cos($angle)"/>
-            <xsl:variable name="connectY" select="math:sin($angle)"/>
+            <xsl:variable name="x" select="math:cos($angle)"/>
+            <xsl:variable name="y" select="math:sin($angle)"/>
 
             <xsl:text>&lt;line x1="</xsl:text>
-            <xsl:value-of select="fun:normCoord($connectX, @depth + 1)"/>
+            <xsl:value-of select="fun:normCoord($x, @depth + 1)"/>
             <xsl:text>" y1="</xsl:text>
-            <xsl:value-of select="fun:normCoord($connectY, @depth + 1)"/>
+            <xsl:value-of select="fun:normCoord($y, @depth + 1)"/>
             <xsl:text>" x2="</xsl:text>
-            <xsl:value-of select="fun:normCoord($connectX, @depth)"/>
+            <xsl:value-of select="fun:normCoord($x, @depth)"/>
             <xsl:text>" y2="</xsl:text>
-            <xsl:value-of select="fun:normCoord($connectY, @depth)"/>
+            <xsl:value-of select="fun:normCoord($y, @depth)"/>
             <xsl:text>" stroke="red" stroke-width="4"/&gt;</xsl:text>
 
-            <xsl:if test="not(following-sibling::Node) and preceding-sibling::Node">
-                <xsl:variable name="mid" select="fun:getMid(preceding-sibling::Node[last()])"/>
-                <xsl:variable name="siblingConnectX" select="math:cos($mid)"/>
-                <xsl:variable name="siblingConnectY" select="math:sin($mid)"/>
-                <xsl:value-of select="fun:generateArcPath(
-                fun:normCoord($siblingConnectX, @depth), fun:normCoord($siblingConnectY, @depth),
-                fun:normCoord($connectX, @depth), fun:normCoord($connectY, @depth))"/>
+
+            <xsl:if test="preceding-sibling::Node">
+                <xsl:variable name="parAngle" select="fun:getMid(..)"/>
+                <xsl:variable name="siblingAngle" select="fun:getMid(preceding-sibling::Node[1])"/>
+                <xsl:choose>
+                    <xsl:when test="abs($angle - $parAngle) gt abs($angle - $siblingAngle)">
+                        <xsl:value-of select="fun:makePath($angle, $siblingAngle, @depth)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="fun:makePath($angle, $parAngle, @depth)"/>
+                        <xsl:value-of select="fun:makePath($parAngle, $siblingAngle, @depth)"/>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:if>
             
             <!-- ajoute les lignes grises jusqu'a la profondeur maximale -->
 <!-- 
             <xsl:if test=".[not(*)]">
                     <xsl:text>&lt;line x1="</xsl:text>
-                    <xsl:value-of select="fun:normCoord($connectX, @depth + 1)"/>
+                    <xsl:value-of select="fun:normCoord($x, @depth + 1)"/>
                     <xsl:text>" y1="</xsl:text>
-                    <xsl:value-of select="fun:normCoord($connectY, @depth + 1)"/>
+                    <xsl:value-of select="fun:normCoord($y, @depth + 1)"/>
                     <xsl:text>" x2="</xsl:text>
-                    <xsl:value-of select="fun:normCoord($connectX, /ArbreDeVie/@max-depth)"/>
+                    <xsl:value-of select="fun:normCoord($x, /ArbreDeVie/@max-depth)"/>
                     <xsl:text>" y2="</xsl:text>
-                    <xsl:value-of select="fun:normCoord($connectY, /ArbreDeVie/@max-depth)"/>
+                    <xsl:value-of select="fun:normCoord($y, /ArbreDeVie/@max-depth)"/>
                     <xsl:text>" stroke="#999999" stroke-width="4"/&gt;</xsl:text>
             </xsl:if> 
--->
+ -->
         </xsl:variable>
 
         <xsl:variable name="res">
