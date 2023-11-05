@@ -1,8 +1,10 @@
 # ProjetXML
 
+Dépot du projet pour l'UE Formats de Documents et XML de Master en Informatique de l'année 2022-2023
+
 ## Binome
-- Tazouev Arbi, 21957896
-- Guinet Virgile, 21952934
+- Tazouev Arbi
+- Guinet Virgile
 
 ## Utilisation
 
